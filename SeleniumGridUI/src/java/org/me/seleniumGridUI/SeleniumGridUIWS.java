@@ -5,9 +5,9 @@
  */
 package org.me.seleniumGridUI;
 
-import org.me.seleniumGridUI.model.StopSeleniumXmlInput;
+import org.me.seleniumGridUI.model.StopSeleniumRequest;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
-import org.me.seleniumGridUI.model.StartSeleniumXmlInput;
+import org.me.seleniumGridUI.model.StartSeleniumRequest;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
@@ -26,7 +26,7 @@ public class SeleniumGridUIWS {
 
     @WebMethod(operationName = "StartSeleniumClient")
     @WebResult(name = "hostname")
-    public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumXmlInput client){
+    public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumRequest client){
         HostDetails hostDetails = SeleniumGridHelper.getHostDetails(client.getHostname());
         StartSeleniumResponse myResponse = new StartSeleniumResponse(hostDetails);
         try {
@@ -45,9 +45,8 @@ public class SeleniumGridUIWS {
         return myResponse;
     }
     
-    @WebMethod(operationName = "StopSeleniumClient")
-    @WebResult(name = "status")
-    public SeleniumResponse StopSelenium(@WebParam(name = "clientdetails") StopSeleniumXmlInput client){
+    @WebMethod(operationName = "StopSeleniumClient")    
+    public SeleniumResponse StopSelenium(@WebParam(name = "clientdetails") StopSeleniumRequest client){
         SeleniumResponse seleniumResponse = new SeleniumResponse();
         try {
             SeleniumOperation.getInstance().stopJavaClient(client.getHostname(), client.getPort(), client.getSessionid());

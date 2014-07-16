@@ -12,8 +12,8 @@ package org.me.seleniumGridUI.model;
  */
 public class SeleniumResponse {
     
-    public Response response;
-    public String info = "Selenium Response";
+    private Response response;
+    private String info = "Selenium Response";
 
     public Response getResponse() {
         return response;
@@ -29,7 +29,5 @@ public class SeleniumResponse {
 
     public void setInfo(String info) {
         this.info = info;
-    }
-    
-    
+    }   
 }

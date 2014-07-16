@@ -11,8 +11,10 @@ import java.net.URL;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
 import org.me.seleniumGridUI.util.Constants;
+import org.me.seleniumGridUI.util.ExtendedRemoteWebDriver;
 import org.me.seleniumGridUI.util.SeleniumGridHelper;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class SeleniumOperation {
@@ -33,7 +35,7 @@ public class SeleniumOperation {
      * @throws Throwable 
      */
     public String startBrowser(StartSeleniumResponse response) throws Throwable{
-        String remoteClientUrl = String.format("http://%s:%s/wd/hub", response.getHostName(), response.getFreePort());        
+        String remoteClientUrl = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, response.getHostName(), response.getFreePort());        
         WebDriver driver = new RemoteWebDriver(new URL(remoteClientUrl), SeleniumGridHelper.createBrowserCapbility(response.getBrowser()));
 
         if (driver == null) {
@@ -49,7 +51,8 @@ public class SeleniumOperation {
      * @throws Throwable 
      */
     public int startExecutor(HostDetails hostDetails) throws Throwable {
-        String path = "S:/QATestTools/AS24.SeleniumScheduler/AS24.SeleniumScheduler/bin/Debug/WindowsTaskExecutor.exe";
+        //String path = "S:/QATestTools/AS24.SeleniumScheduler/AS24.SeleniumScheduler/bin/Debug/WindowsTaskExecutor.exe";
+        String path = "C:\\Users\\vkumar\\Downloads\\SeleniumGridUI\\SeleniumGridUI\\src\\conf\\executor\\WindowsTaskExecutor\\WindowsTaskExecutor.exe";        
         String[] startArgument = seleniumClientStartArguments(hostDetails.getHostName(), hostDetails.getPort());
         path = String.format("%s %s", path, startArgument[0]);
         Process ps = Runtime.getRuntime().exec(path);
@@ -63,17 +66,28 @@ public class SeleniumOperation {
      * @param sessionId
      * @throws Throwable 
      */
-    public void stopJavaClient(String hostname, int portNumber, String sessionId) throws Throwable{
-        DefaultSelenium runningSeleniumClient = new DefaultSelenium(hostname, portNumber, "*webdriver", "localhost");
-        if (sessionId != null && sessionId.length() != 0) {
+    public void stopJavaClient(String hostname, int portNumber, String sessionId) throws Throwable{                        
+        if (SeleniumGridHelper.isValidSessionParam(sessionId)) {
             try {
-                runningSeleniumClient.start("webdriver.remote.sessionid=" + sessionId);
+                 String remoteClientUrl = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, portNumber);
+                 DesiredCapabilities dummyCap = SeleniumGridHelper.createBrowserCapbility("");
+                 ExtendedRemoteWebDriver  driver = new ExtendedRemoteWebDriver(new URL(remoteClientUrl), dummyCap, sessionId);
+                driver.startSession(dummyCap);
+                driver.quit();
             } catch (Throwable e) {
                 throw e;
-            }finally{
-                runningSeleniumClient.shutDownSeleniumServer();
+            }finally{  
+                StopSeleniumJavaClient(hostname, portNumber);
             }
         }
+        else
+            StopSeleniumJavaClient(hostname, portNumber);
+    }
+    
+    private void StopSeleniumJavaClient(String hostname, int portNumber)
+    {
+        DefaultSelenium runningSeleniumClient = new DefaultSelenium(hostname, portNumber, "*webdriver", "localhost");
+        runningSeleniumClient.shutDownSeleniumServer();
     }
     
     private String[] seleniumClientStartArguments(String machineName, int portNumber) {

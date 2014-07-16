@@ -55,6 +55,10 @@ public class SeleniumGridHelper {
         return (browser != null && !browser.isEmpty()) ? true : false;
     }
     
+    public static boolean isValidSessionParam(String sessionId) {
+        return (sessionId != null && !sessionId.isEmpty()) ? true : false;
+    }
+    
     public static DesiredCapabilities createBrowserCapbility(String browser)
     {
         DesiredCapabilities caps = null;
