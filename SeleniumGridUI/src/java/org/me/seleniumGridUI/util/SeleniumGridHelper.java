@@ -8,6 +8,7 @@ package org.me.seleniumGridUI.util;
 
 import java.net.InetAddress;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.me.seleniumGridUI.model.HostDetails;
@@ -57,32 +58,5 @@ public class SeleniumGridHelper {
     
     public static boolean isValidSessionParam(String sessionId) {
         return (sessionId != null && !sessionId.isEmpty()) ? true : false;
-    }
-    
-    public static DesiredCapabilities createBrowserCapbility(String browser)
-    {
-        DesiredCapabilities caps = null;
-        
-        if(browser.equalsIgnoreCase("firefox"))        
-        {
-            caps = DesiredCapabilities.firefox();
-        }
-        else if (browser.equalsIgnoreCase("chrome"))
-        {
-            caps = DesiredCapabilities.chrome();
-        }
-        else if (browser.equalsIgnoreCase("ie"))
-        {
-            caps = DesiredCapabilities.internetExplorer();
-        }
-        else if (browser.equalsIgnoreCase("phantomjs"))
-        {
-            caps = DesiredCapabilities.phantomjs();
-        }
-        else
-        {
-            caps = DesiredCapabilities.htmlUnitWithJs();  
-        }        
-        return caps;
     }
 }
