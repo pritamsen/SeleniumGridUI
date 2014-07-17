@@ -12,10 +12,14 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
+import javax.servlet.ServletContext;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.Response;
 import org.me.seleniumGridUI.model.SeleniumResponse;
 import org.me.seleniumGridUI.util.SeleniumGridHelper;
+import javax.annotation.Resource;
 
 /**
  *
@@ -24,10 +28,16 @@ import org.me.seleniumGridUI.util.SeleniumGridHelper;
 @WebService(serviceName = "SeleniumGridUIWS")
 public class SeleniumGridUIWS {
 
+    @Resource
+    private WebServiceContext context;
+
     @WebMethod(operationName = "StartSeleniumClient")
     @WebResult(name = "hostname")
     public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumRequest client){
         HostDetails hostDetails = SeleniumGridHelper.getHostDetails(client.getHostname());
+        ServletContext servletContext =
+                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+        //context.getResourceAsStream("/WEB-INF/file1.xml");  
         StartSeleniumResponse myResponse = new StartSeleniumResponse(hostDetails);
         try {
             SeleniumOperation seleniumOperation = SeleniumOperation.getInstance();
