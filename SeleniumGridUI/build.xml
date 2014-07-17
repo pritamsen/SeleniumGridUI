@@ -68,4 +68,9 @@
     nbproject/build-impl.xml file.
 
     -->
+	<target name="-post-compile">
+        <copy todir="build/web">
+            <fileset dir="src" includes="resources/**" />
+        </copy>
+    </target> 
 </project>

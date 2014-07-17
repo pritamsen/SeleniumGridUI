@@ -8,6 +8,7 @@ package org.me.seleniumGridUI;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import java.net.URL;
+import javax.servlet.ServletContext;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
 import org.me.seleniumGridUI.util.Constants;
@@ -50,9 +51,8 @@ public class SeleniumOperation {
      * @return
      * @throws Throwable 
      */
-    public int startExecutor(HostDetails hostDetails) throws Throwable {
-        //String path = "S:/QATestTools/AS24.SeleniumScheduler/AS24.SeleniumScheduler/bin/Debug/WindowsTaskExecutor.exe";
-        String path = "C:\\Users\\vkumar\\Downloads\\SeleniumGridUI\\SeleniumGridUI\\src\\conf\\executor\\WindowsTaskExecutor\\WindowsTaskExecutor.exe";        
+    public int startExecutor(HostDetails hostDetails, ServletContext context) throws Throwable {        
+        String path = context.getRealPath("/resources/executor/WindowsTaskExecutor/WindowsTaskExecutor.exe");  
         String[] startArgument = seleniumClientStartArguments(hostDetails.getHostName(), hostDetails.getPort());
         path = String.format("%s %s", path, startArgument[0]);
         Process ps = Runtime.getRuntime().exec(path);

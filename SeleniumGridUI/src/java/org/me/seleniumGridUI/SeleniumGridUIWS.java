@@ -35,13 +35,12 @@ public class SeleniumGridUIWS {
     @WebResult(name = "hostname")
     public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumRequest client){
         HostDetails hostDetails = SeleniumGridHelper.getHostDetails(client.getHostname());
-        ServletContext servletContext =
-                (ServletContext) context.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
-        //context.getResourceAsStream("/WEB-INF/file1.xml");  
+        MessageContext msgContext = context.getMessageContext();
+        ServletContext serveletContext = (ServletContext) msgContext.get(msgContext.SERVLET_CONTEXT);
         StartSeleniumResponse myResponse = new StartSeleniumResponse(hostDetails);
         try {
             SeleniumOperation seleniumOperation = SeleniumOperation.getInstance();
-            seleniumOperation.startExecutor(hostDetails);
+            seleniumOperation.startExecutor(hostDetails, serveletContext);
             if (SeleniumGridHelper.isValidBrowserParam(client.getBrowser())) {
                 myResponse.setBrowser(client.getBrowser());
                 String session = seleniumOperation.startBrowser(myResponse);
