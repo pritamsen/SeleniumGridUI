@@ -11,6 +11,7 @@ public class HostDetails {
     private int port;
     private String hostName;
     private String hostAddress;
+    private String operatingSystem;
 
     public int getPort() {
         return port;
@@ -34,5 +35,13 @@ public class HostDetails {
 
     public void setHostAddress(String hostAddress) {
         this.hostAddress = hostAddress;
+    }
+    
+     public String getHostOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setHostOperatingSystem(String operatingSystem) {
+        this.operatingSystem = operatingSystem;
     }
 }

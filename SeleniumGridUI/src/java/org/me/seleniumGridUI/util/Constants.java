@@ -5,15 +5,21 @@
  */
 package org.me.seleniumGridUI.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author vkumar
  */
 public class Constants {
     
-    public final static String SELENIUM_JAVA_CLIENT_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\selenium-server-standalone-2.42.0.jar";
+    public final static String SELENIUM_JAVA_CLIENT_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\selenium-server-standalone-2.42.0.jar";    
     public final static String SELENIUM_CHROMEDRIVER_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\ChromeDriver2.10\\chromedriver.exe";
     public final static String SELENIUM_IEDRIVER_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\IEDriver2.42.0\\IEDriverServer.exe";
     public final static String SELENIUM_PHANTOMJS_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\phantomjs-1.9.7\\phantomjs.exe";
     public final static String SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT = "http://%s:%s/wd/hub";
+    
+    public final static List MAC_MACHINE = Arrays.asList("andreass-mbp.as24.local");
+    public final static String SELENIUM_JAVA_CLIENT_LOCATION_MAC = "/Volumes/SeleniumSetUp/selenium-server-standalone-2.42.0.jar";    
 }

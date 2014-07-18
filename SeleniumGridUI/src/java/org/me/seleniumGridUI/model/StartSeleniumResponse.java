@@ -18,11 +18,13 @@ public class StartSeleniumResponse extends SeleniumResponse{
     private String ipAddres;
     private String browser;
     private String sessionID;
+    private String os;
 
     public StartSeleniumResponse(HostDetails hostDetails){
         this.hostName = hostDetails.getHostName();
         this.freePort = hostDetails.getPort();
         this.ipAddres = hostDetails.getHostAddress(); 
+        this.os = hostDetails.getHostOperatingSystem();
     }
     
     public String getHostName() {
@@ -63,5 +65,13 @@ public class StartSeleniumResponse extends SeleniumResponse{
 
     public String getSessionId() {
         return this.sessionID;
+    }
+    
+    public void setOs(String value) {
+        this.os = value;
+    }
+
+    public String getOs() {
+        return this.os;
     }
 }

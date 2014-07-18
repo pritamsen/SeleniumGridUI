@@ -34,6 +34,7 @@ public class SeleniumGridHelper {
         HostDetails hostDetails = new HostDetails();
         hostDetails.setHostAddress(InetAddress.getLocalHost().getHostAddress());
         hostDetails.setHostName("localhost");
+        hostDetails.setHostOperatingSystem(ReturnOperatingSystem(InetAddress.getLocalHost().getHostName()));
         return hostDetails;
     }
     
@@ -41,8 +42,19 @@ public class SeleniumGridHelper {
         InetAddress inetAddress = InetAddress.getByName(hostName);
         HostDetails hostDetails = new HostDetails();
         hostDetails.setHostAddress(inetAddress.getHostAddress());
-        hostDetails.setHostName(inetAddress.getHostName());
+        final String myHostName = inetAddress.getHostName();
+        hostDetails.setHostName(myHostName); 
+        hostDetails.setHostOperatingSystem(ReturnOperatingSystem(myHostName));
         return hostDetails;
+    }
+    
+    private static String ReturnOperatingSystem (String validHostname)
+    {
+        if(Constants.MAC_MACHINE.contains(validHostname))
+        {
+           return "mac";
+        }
+        return "windows";
     }
       
     public static int generateRandomPortNumber() {
