@@ -5,13 +5,11 @@
  */
 package org.me.seleniumGridUI.model;
 
-import org.me.seleniumGridUI.model.HostDetails;
-
 /**
  *
  * @author vkumar
  */
-public class StartSeleniumResponse extends SeleniumResponse{
+public class StartSeleniumResponse extends SeleniumResponse {
 
     private String hostName;
     private int freePort;
@@ -20,13 +18,14 @@ public class StartSeleniumResponse extends SeleniumResponse{
     private String sessionID;
     private String os;
 
-    public StartSeleniumResponse(HostDetails hostDetails){
+    public StartSeleniumResponse(HostDetails hostDetails, StartSeleniumRequest request) {
         this.hostName = hostDetails.getHostName();
         this.freePort = hostDetails.getPort();
-        this.ipAddres = hostDetails.getHostAddress(); 
+        this.ipAddres = hostDetails.getHostAddress();
         this.os = hostDetails.getHostOperatingSystem();
+        this.browser = request.getBrowser();
     }
-    
+
     public String getHostName() {
         return this.hostName;
     }
@@ -66,7 +65,7 @@ public class StartSeleniumResponse extends SeleniumResponse{
     public String getSessionId() {
         return this.sessionID;
     }
-    
+
     public void setOs(String value) {
         this.os = value;
     }

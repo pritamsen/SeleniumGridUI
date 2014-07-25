@@ -33,37 +33,32 @@ public class SeleniumGridUIWS {
 
     @WebMethod(operationName = "StartSeleniumClient")
     @WebResult(name = "hostname")
-    public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumRequest client){
+    public StartSeleniumResponse StartSelenium(@WebParam(name = "clientdetails") StartSeleniumRequest client) {
         HostDetails hostDetails = SeleniumGridHelper.getHostDetails(client.getHostname());
         MessageContext msgContext = context.getMessageContext();
         ServletContext serveletContext = (ServletContext) msgContext.get(msgContext.SERVLET_CONTEXT);
-        StartSeleniumResponse myResponse = new StartSeleniumResponse(hostDetails);
+        StartSeleniumResponse myResponse = new StartSeleniumResponse(hostDetails, client);
         try {
             SeleniumOperation seleniumOperation = SeleniumOperation.getInstance();
-            seleniumOperation.startExecutor(hostDetails, serveletContext);
-            if (SeleniumGridHelper.isValidBrowserParam(client.getBrowser())) {
-                myResponse.setBrowser(client.getBrowser());
-                String session = seleniumOperation.startBrowser(myResponse);
-                myResponse.setSessionId(session);
-            }
+            seleniumOperation.StartJavaClientAndOpenRequestedBrowserSession(hostDetails, myResponse, serveletContext);
             myResponse.setResponse(Response.SUCCESS);
-        } catch(Throwable e){
+        } catch (Throwable e) {
             myResponse.setResponse(Response.FAIL);
             myResponse.setInfo(e.getLocalizedMessage());
         }
         return myResponse;
     }
-    
-    @WebMethod(operationName = "StopSeleniumClient")    
-    public SeleniumResponse StopSelenium(@WebParam(name = "clientdetails") StopSeleniumRequest client){
+
+    @WebMethod(operationName = "StopSeleniumClient")
+    public SeleniumResponse StopSelenium(@WebParam(name = "clientdetails") StopSeleniumRequest client) {
         SeleniumResponse seleniumResponse = new SeleniumResponse();
         try {
-            SeleniumOperation.getInstance().stopJavaClient(client.getHostname(), client.getPort(), client.getSessionid());
+            SeleniumOperation.getInstance().StopJavaClientAndCloseRequestedBrowserSession(client.getHostname(), client.getPort(), client.getSessionid());
             seleniumResponse.setResponse(Response.SUCCESS);
-        }catch(Throwable e){
+        } catch (Throwable e) {
             seleniumResponse.setResponse(Response.FAIL);
             seleniumResponse.setInfo(e.getLocalizedMessage());
         }
         return seleniumResponse;
-    }    
+    }
 }

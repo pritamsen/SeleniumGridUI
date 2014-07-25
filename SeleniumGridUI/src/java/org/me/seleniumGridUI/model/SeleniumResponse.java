@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.me.seleniumGridUI.model;
 
 /**
@@ -11,7 +10,7 @@ package org.me.seleniumGridUI.model;
  * @author dhayad
  */
 public class SeleniumResponse {
-    
+
     private Response response;
     private String info = "Selenium Response";
 
@@ -29,5 +28,5 @@ public class SeleniumResponse {
 
     public void setInfo(String info) {
         this.info = info;
-    }   
+    }
 }

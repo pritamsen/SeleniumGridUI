@@ -6,19 +6,8 @@
 package org.me.seleniumGridUI;
 
 import com.thoughtworks.selenium.DefaultSelenium;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 import javax.servlet.ServletContext;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
@@ -31,9 +20,11 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.uiautomation.ios.IOSCapabilities;
 
 public class SeleniumOperation {
-
+    
+    private String MAC_TEMP_FILE;
     /**
      * Get an instance of selenium operation
      *
@@ -49,17 +40,36 @@ public class SeleniumOperation {
      * @return sessionId
      * @throws Throwable
      */
-    public String startBrowser(StartSeleniumResponse response) throws Throwable {
+    private String startBrowser(StartSeleniumResponse response) throws Throwable {
         final String hostname = response.getHostName();
         final int port = response.getFreePort();
-        IsJavaClientStartedFully(hostname, port);
+        
         String remoteClientUrl = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, port);
+        
         WebDriver driver = new RemoteWebDriver(new URL(remoteClientUrl), CreateBrowserCapbility(response.getBrowser()));
 
         if (driver == null) {
             return "NO_WEB_DRIVER";
         }
         return ((RemoteWebDriver) driver).getSessionId().toString();
+    }
+
+    public void StartJavaClientAndOpenRequestedBrowserSession(HostDetails hostDetails, StartSeleniumResponse response, ServletContext serveletContext) throws Throwable {
+        if (SeleniumGridHelper.isValidBrowserParam(response.getBrowser())) {
+            startExecutor(hostDetails, response.getBrowser(), serveletContext);
+            response.setBrowser(response.getBrowser());
+            if(response.getBrowser().toLowerCase().startsWith("i") || response.getBrowser().toLowerCase().startsWith("a"))
+                 return;
+            String session = startBrowser(response);
+            response.setSessionId(session);
+        } else {
+            startExecutor(hostDetails, "", serveletContext);
+        }
+        
+        if(hostDetails.getHostOperatingSystem().equals("mac"))
+        {
+            SeleniumMacOperations.DeleteTextFile(MAC_TEMP_FILE);
+        }
     }
 
     /**
@@ -71,26 +81,22 @@ public class SeleniumOperation {
      * @return
      * @throws Throwable
      */
-    public int startExecutor(HostDetails hostDetails, ServletContext context) throws Throwable {
+    private int startExecutor(HostDetails hostDetails, String driver, ServletContext context) throws Throwable {
         String windowsExecutorPath = context.getRealPath("/WEB-INF/resources/executor/WindowsTaskExecutor/WindowsTaskExecutor.exe");
-        //String windowsExecutorPath = "S:\\QATestTools\\AS24.SeleniumScheduler\\AS24.SeleniumScheduler\\bin\\Debug\\WindowsTaskExecutor.exe";
         String puttyExePath = context.getRealPath("/WEB-INF/resources/Putty/PUTTY.EXE");
+        
+        
 
         if (hostDetails.getHostOperatingSystem().equals("mac")) {
-            String[] path = SeleniumClientStartArgumentsMacBased(puttyExePath, hostDetails.getHostName(), CreateTextFileWithseleniumClientStartCommandsInMac(hostDetails.getPort()));
-            windowsExecutorPath = String.format("%s %s", windowsExecutorPath, path[0]);
-
+            final SeleniumMacOperations seleniumMacOperations = new SeleniumMacOperations(windowsExecutorPath, puttyExePath, hostDetails.getPort(), hostDetails.getHostName(), driver);
+            windowsExecutorPath = seleniumMacOperations.CompeleteSyntaxToExecuteForMac();
+            MAC_TEMP_FILE = seleniumMacOperations.getTempFile();
         } else {
-            windowsExecutorPath = StartArgumentsForSeleniumJavaClientWindows(windowsExecutorPath, hostDetails.getHostName(), hostDetails.getPort());
+            windowsExecutorPath = new SeleniumWindowsOperation(windowsExecutorPath, hostDetails.getPort(), hostDetails.getHostName(), driver).CompeleteSyntaxToExecuteForWindows();
         }
-
         Process ps = Runtime.getRuntime().exec(windowsExecutorPath);
+        IsJavaClientStartedFully(hostDetails.getHostName(), hostDetails.getPort());
         return ps.waitFor();
-    }
-
-    private String StartArgumentsForSeleniumJavaClientWindows(String pathWindowsExecutor, String hostName, int port) {
-        String[] startArgument = seleniumClientStartArgumentsWindowsBased(hostName, port);
-        return String.format("%s %s", pathWindowsExecutor, startArgument[0]);
     }
 
     /**
@@ -101,7 +107,7 @@ public class SeleniumOperation {
      * @param sessionId
      * @throws Throwable
      */
-    public void stopJavaClient(String hostname, int portNumber, String sessionId) throws Throwable {
+    public void StopJavaClientAndCloseRequestedBrowserSession(String hostname, int portNumber, String sessionId) throws Throwable {
         if (SeleniumGridHelper.isValidSessionParam(sessionId)) {
             try {
                 String remoteClientUrl = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, portNumber);
@@ -121,6 +127,7 @@ public class SeleniumOperation {
 
     private void StopSeleniumJavaClient(String hostname, int portNumber) {
         DefaultSelenium runningSeleniumClient = InitializeJavaBackWardSelenium(hostname, portNumber);
+        runningSeleniumClient.stop();
         runningSeleniumClient.shutDownSeleniumServer();
     }
 
@@ -128,43 +135,8 @@ public class SeleniumOperation {
         return new DefaultSelenium(hostname, portNumber, "*webdriver", "localhost");
     }
 
-    private String[] seleniumClientStartArgumentsWindowsBased(String machineName, int portNumber) {
-        String argumentsArray[] = {String.format("machine=%s process=java processargs=\" -jar \\\"%s\\\" -port %s -Dwebdriver.ie.driver=\\\"%s\\\" -Dwebdriver.chrome.driver=\\\"%s\\\" -Dphantomjs.binary.path=\\\"%s\\\"\"",
-            machineName, Constants.SELENIUM_JAVA_CLIENT_LOCATION,
-            portNumber, Constants.SELENIUM_IEDRIVER_LOCATION,
-            Constants.SELENIUM_CHROMEDRIVER_LOCATION,
-            Constants.SELENIUM_PHANTOMJS_LOCATION)};
-        return argumentsArray;
-    }
-
-    private String[] SeleniumClientStartArgumentsMacBased(String pathPuttyExe, String machineName, String textFileLocationWithCommandToExecuteOnMac) {
-        String argumentsArray[] = {String.format("machine=localhost process=cmd.exe processargs=\"/c %s -ssh zzqaadmin@%s -pw as24test -m %s\"",
-            pathPuttyExe, machineName, textFileLocationWithCommandToExecuteOnMac)};
-        return argumentsArray;
-    }
-
-    private String CreateTextFileWithseleniumClientStartCommandsInMac(int portNumber) {
-        String syntax = String.format("java -jar %s -port %s -beta", Constants.SELENIUM_JAVA_CLIENT_LOCATION_MAC, portNumber);
-        String randomFileName = UUID.randomUUID().toString();
-        try {
-            //What ever the file path is.
-            String txtFileLocationContainingMacSyntax = String.format("C:\\Temp\\%s.txt", randomFileName);
-            File statText = new File(txtFileLocationContainingMacSyntax);
-            FileOutputStream is = new FileOutputStream(statText);
-            OutputStreamWriter osw = new OutputStreamWriter(is);
-            Writer w = new BufferedWriter(osw);
-            w.write(syntax);
-            w.close();
-            return txtFileLocationContainingMacSyntax;
-        } catch (IOException e) {
-            System.err.println(String.format("Problem writing to the file %s.txt", randomFileName));
-        }
-        return null;
-    }
-
-    public static DesiredCapabilities CreateBrowserCapbility(String browser) {
+    private static DesiredCapabilities CreateBrowserCapbility(String browser) {
         DesiredCapabilities caps = null;
-
         if (browser.equalsIgnoreCase("firefox")) {
             caps = DesiredCapabilities.firefox();
         } else if (browser.equalsIgnoreCase("chrome")) {
@@ -188,7 +160,13 @@ public class SeleniumOperation {
             caps = DesiredCapabilities.phantomjs();
         } else if (browser.equalsIgnoreCase("safari")) {
             caps = DesiredCapabilities.safari();
-        } else {
+        } else if (browser.equalsIgnoreCase("iphone")) {
+            caps =  IOSCapabilities.iphone("Safari");
+        }
+        else if (browser.equalsIgnoreCase("ipad")) {
+            caps = DesiredCapabilities.ipad();
+        }
+            else {
             caps = DesiredCapabilities.htmlUnit();
         }
         return caps;
@@ -197,18 +175,18 @@ public class SeleniumOperation {
     private void IsJavaClientStartedFully(String hostname, int portNumber) throws Throwable {
         int retyTimes = 5;
         int delayTime = 2000;
-        URL url = new URL(String.format("http://%s:%s/wd/hub", hostname, portNumber));
+        URL url = new URL(String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, portNumber));
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         int i = 0;
         for (i = 0; i < retyTimes; i++) {
             try {
                 final int status = http.getResponseCode();
                 if (status != 200) {
-                    throw new Exception(String.format("The status is now %s", status));
+                    throw new Exception(String.format("The status of the java client in the request machine %s at port number %s is  now %s", hostname, portNumber, status));
                 }
             } catch (Exception e) {
                 if (i == retyTimes) {
-                    throw new Exception(String.format("%s attempts to retry failed at %s ms interval", retyTimes, delayTime));
+                    throw new Exception(String.format("%s attempts to retry failed at %s ms interval becoz %s", retyTimes, delayTime, e.getMessage()));
                 }
                 Thread.sleep(delayTime);
             }

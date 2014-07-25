@@ -48,5 +48,5 @@ public class StopSeleniumRequest implements Serializable {
 
     public void setSessionid(String sessionid) {
         this.sessionid = sessionid;
-    }    
+    }
 }

@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.me.seleniumGridUI.model;
 
 public class HostDetails {
-    
+
     private int port;
     private String hostName;
     private String hostAddress;
@@ -36,8 +35,8 @@ public class HostDetails {
     public void setHostAddress(String hostAddress) {
         this.hostAddress = hostAddress;
     }
-    
-     public String getHostOperatingSystem() {
+
+    public String getHostOperatingSystem() {
         return operatingSystem;
     }
 

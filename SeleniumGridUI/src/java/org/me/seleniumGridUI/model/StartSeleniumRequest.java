@@ -38,5 +38,5 @@ public class StartSeleniumRequest implements Serializable {
 
     public void setBrowser(String browser) {
         this.browser = browser;
-    }  
+    }
 }
