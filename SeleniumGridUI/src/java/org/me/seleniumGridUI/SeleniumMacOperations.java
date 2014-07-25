@@ -74,7 +74,7 @@ public class SeleniumMacOperations {
 
     public String CompeleteSyntaxToExecuteForMac() {
         String argumentsArray[] = {String.format("machine=localhost process=cmd.exe processargs=\"/c %s -ssh %s@%s -pw %s -m %s\"",
-            _pathPuttyExe, _hostName, Constants.NETWORK_USER_NAME, Constants.NETWORK_PASSWORD, CreateTextFileWithCommandToExecuteInMacOs())};
+            _pathPuttyExe, Constants.NETWORK_USER_NAME, _hostName, Constants.NETWORK_PASSWORD, CreateTextFileWithCommandToExecuteInMacOs())};
         return String.format("%s %s", _windowExecutorPath, argumentsArray[0]);
     }
 
