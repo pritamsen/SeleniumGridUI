@@ -6,13 +6,14 @@
 package org.me.seleniumGridUI;
 
 import com.thoughtworks.selenium.DefaultSelenium;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import javax.servlet.ServletContext;
+import org.json.JSONObject;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
 import org.me.seleniumGridUI.util.Constants;
 import org.me.seleniumGridUI.util.ExtendedRemoteWebDriver;
+import static org.me.seleniumGridUI.util.JsonReader.readJsonFromUrl;
 import org.me.seleniumGridUI.util.SeleniumGridHelper;
 import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
@@ -23,8 +24,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.uiautomation.ios.IOSCapabilities;
 
 public class SeleniumOperation {
-    
+
     private String MAC_TEMP_FILE;
+
     /**
      * Get an instance of selenium operation
      *
@@ -43,9 +45,9 @@ public class SeleniumOperation {
     private String startBrowser(StartSeleniumResponse response) throws Throwable {
         final String hostname = response.getHostName();
         final int port = response.getFreePort();
-        
+
         String remoteClientUrl = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, port);
-        
+
         WebDriver driver = new RemoteWebDriver(new URL(remoteClientUrl), CreateBrowserCapbility(response.getBrowser()));
 
         if (driver == null) {
@@ -58,16 +60,16 @@ public class SeleniumOperation {
         if (SeleniumGridHelper.isValidBrowserParam(response.getBrowser())) {
             startExecutor(hostDetails, response.getBrowser(), serveletContext);
             response.setBrowser(response.getBrowser());
-            if(response.getBrowser().toLowerCase().startsWith("i") || response.getBrowser().toLowerCase().startsWith("a"))
-                 return;
+            if (response.getBrowser().toLowerCase().startsWith("i") || response.getBrowser().toLowerCase().startsWith("a")) {
+                return;
+            }
             String session = startBrowser(response);
             response.setSessionId(session);
         } else {
             startExecutor(hostDetails, "", serveletContext);
         }
-        
-        if(hostDetails.getHostOperatingSystem().equals("mac"))
-        {
+
+        if (hostDetails.getHostOperatingSystem().equals("mac")) {
             SeleniumMacOperations.DeleteTextFile(MAC_TEMP_FILE);
         }
     }
@@ -84,8 +86,6 @@ public class SeleniumOperation {
     private int startExecutor(HostDetails hostDetails, String driver, ServletContext context) throws Throwable {
         String windowsExecutorPath = context.getRealPath("/WEB-INF/resources/executor/WindowsTaskExecutor/WindowsTaskExecutor.exe");
         String puttyExePath = context.getRealPath("/WEB-INF/resources/Putty/PUTTY.EXE");
-        
-        
 
         if (hostDetails.getHostOperatingSystem().equals("mac")) {
             final SeleniumMacOperations seleniumMacOperations = new SeleniumMacOperations(windowsExecutorPath, puttyExePath, hostDetails.getPort(), hostDetails.getHostName(), driver);
@@ -122,6 +122,7 @@ public class SeleniumOperation {
             }
         } else {
             StopSeleniumJavaClient(hostname, portNumber);
+
         }
     }
 
@@ -161,12 +162,10 @@ public class SeleniumOperation {
         } else if (browser.equalsIgnoreCase("safari")) {
             caps = DesiredCapabilities.safari();
         } else if (browser.equalsIgnoreCase("iphone")) {
-            caps =  IOSCapabilities.iphone("Safari");
-        }
-        else if (browser.equalsIgnoreCase("ipad")) {
+            caps = IOSCapabilities.iphone("Safari");
+        } else if (browser.equalsIgnoreCase("ipad")) {
             caps = DesiredCapabilities.ipad();
-        }
-            else {
+        } else {
             caps = DesiredCapabilities.htmlUnit();
         }
         return caps;
@@ -175,15 +174,20 @@ public class SeleniumOperation {
     private void IsJavaClientStartedFully(String hostname, int portNumber) throws Throwable {
         int retyTimes = 5;
         int delayTime = 2000;
-        URL url = new URL(String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT, hostname, portNumber));
-        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        String url = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_STATUS, hostname, portNumber);
         int i = 0;
         for (i = 0; i < retyTimes; i++) {
             try {
-                final int status = http.getResponseCode();
-                if (status != 200) {
-                    throw new Exception(String.format("The status of the java client in the request machine %s at port number %s is  now %s", hostname, portNumber, status));
+                JSONObject json = readJsonFromUrl(url);
+                String os = json.get("value").toString();
+                if (os != null && !os.isEmpty()) {
+                    if (!os.toLowerCase().contains("os")) {
+                        throw new Exception("client is not loaded fully");
+                    }
+                } else {
+                    throw new Exception("Empty os");
                 }
+                break;
             } catch (Exception e) {
                 if (i == retyTimes) {
                     throw new Exception(String.format("%s attempts to retry failed at %s ms interval becoz %s", retyTimes, delayTime, e.getMessage()));
@@ -191,6 +195,5 @@ public class SeleniumOperation {
                 Thread.sleep(delayTime);
             }
         }
-
     }
 }

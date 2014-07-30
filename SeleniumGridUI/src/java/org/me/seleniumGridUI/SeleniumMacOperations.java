@@ -48,8 +48,6 @@ public class SeleniumMacOperations {
         String syntax = String.format("osascript -e 'tell app \"Terminal\" to do script \"java -jar %s -port %s\"'", Constants.SELENIUM_JAVA_CLIENT_LOCATION_MAC, _portNumber);
         if (_driver.toLowerCase().startsWith("i")) {
             syntax = String.format("osascript -e 'tell app \"Terminal\" to do script \"java -jar %s -port %s -newSessionTimeoutSec 120 -beta\"'", Constants.IOS_Driver_JAVA_CLIENT_LOCATION_MAC, _portNumber);
-        } else if (_driver.toLowerCase().startsWith("a")) {
-            syntax = String.format("java -jar %s -port %s -newSessionTimeoutSec 120", Constants.SELENROID_JAVA_CLIENT_LOCATION_MAC, _portNumber);
         }
         return syntax;
     }
