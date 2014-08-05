@@ -57,8 +57,11 @@ public class SeleniumOperation {
     }
 
     public void StartJavaClientAndOpenRequestedBrowserSession(HostDetails hostDetails, StartSeleniumResponse response, ServletContext serveletContext) throws Throwable {
+        String os = "unknown os";
         if (SeleniumGridHelper.isValidBrowserParam(response.getBrowser())) {
-            startExecutor(hostDetails, response.getBrowser(), serveletContext);
+            os = startExecutor(hostDetails, response.getBrowser(), serveletContext);
+            hostDetails.setHostOperatingSystem(os);
+            response.setOs(os);
             response.setBrowser(response.getBrowser());
             if (response.getBrowser().toLowerCase().startsWith("i") || response.getBrowser().toLowerCase().startsWith("a")) {
                 return;
@@ -66,10 +69,12 @@ public class SeleniumOperation {
             String session = startBrowser(response);
             response.setSessionId(session);
         } else {
-            startExecutor(hostDetails, "", serveletContext);
+            os = startExecutor(hostDetails, "", serveletContext);
+            hostDetails.setHostOperatingSystem(os);
+            response.setOs(os);
         }
 
-        if (hostDetails.getHostOperatingSystem().equals("mac")) {
+        if (hostDetails.getHostOperatingSystem().toLowerCase().startsWith("mac")) {
             SeleniumMacOperations.DeleteTextFile(MAC_TEMP_FILE);
         }
     }
@@ -83,7 +88,7 @@ public class SeleniumOperation {
      * @return
      * @throws Throwable
      */
-    private int startExecutor(HostDetails hostDetails, String driver, ServletContext context) throws Throwable {
+    private String startExecutor(HostDetails hostDetails, String driver, ServletContext context) throws Throwable {
         String windowsExecutorPath = context.getRealPath("/WEB-INF/resources/executor/WindowsTaskExecutor/WindowsTaskExecutor.exe");
         String puttyExePath = context.getRealPath("/WEB-INF/resources/Putty/PUTTY.EXE");
 
@@ -95,8 +100,8 @@ public class SeleniumOperation {
             windowsExecutorPath = new SeleniumWindowsOperation(windowsExecutorPath, hostDetails.getPort(), hostDetails.getHostName(), driver).CompeleteSyntaxToExecuteForWindows();
         }
         Process ps = Runtime.getRuntime().exec(windowsExecutorPath);
-        IsJavaClientStartedFully(hostDetails.getHostName(), hostDetails.getPort());
-        return ps.waitFor();
+        ps.waitFor();
+        return IsJavaClientStartedFully(hostDetails.getHostName(), hostDetails.getPort());
     }
 
     /**
@@ -171,23 +176,23 @@ public class SeleniumOperation {
         return caps;
     }
 
-    private void IsJavaClientStartedFully(String hostname, int portNumber) throws Throwable {
+    private String IsJavaClientStartedFully(String hostname, int portNumber) throws Throwable {
         int retyTimes = 5;
         int delayTime = 2000;
         String url = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_STATUS, hostname, portNumber);
         int i = 0;
         for (i = 0; i < retyTimes; i++) {
             try {
-                JSONObject json = readJsonFromUrl(url);
-                String os = json.get("value").toString();
+                JSONObject jsonValueObject = readJsonFromUrl(url);
+                JSONObject value = (JSONObject) jsonValueObject.get("value");
+                JSONObject osObject = (JSONObject) value.get("os");
+                String os = osObject.get("name").toString();
+
                 if (os != null && !os.isEmpty()) {
-                    if (!os.toLowerCase().contains("os")) {
-                        throw new Exception("client is not loaded fully");
-                    }
+                    return os;
                 } else {
                     throw new Exception("Empty os");
                 }
-                break;
             } catch (Exception e) {
                 if (i == retyTimes) {
                     throw new Exception(String.format("%s attempts to retry failed at %s ms interval becoz %s", retyTimes, delayTime, e.getMessage()));
@@ -195,5 +200,6 @@ public class SeleniumOperation {
                 Thread.sleep(delayTime);
             }
         }
+        return null;
     }
 }

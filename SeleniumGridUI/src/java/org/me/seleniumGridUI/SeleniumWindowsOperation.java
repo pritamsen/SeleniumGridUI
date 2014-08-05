@@ -12,7 +12,6 @@ import org.me.seleniumGridUI.util.Constants;
  * @author vkumar
  */
 public class SeleniumWindowsOperation {
-
     private final int _portNumber;
     private final String _windowExecutorPath;
     private final String _hostName;
@@ -44,10 +43,9 @@ public class SeleniumWindowsOperation {
     }
     
     private String[] seleniumJavaAnroidClientStartArgumentsWindowsBased() {
-        String argumentsArray[] = {String.format("machine=%s username=%s\\%s password=%s process=java processargs=\" -jar \\\"%s\\\" -port %s -selendroidServerPort %s -sessionTimeout  120\"",
+        String argumentsArray[] = {String.format("machine=%s username=%s\\%s password=%s process=java processargs=\" -jar \\\"%s\\\" -port %s -selendroidServerPort %s -sessionTimeout  120 -deviceScreenshot\"",
             _hostName, Constants.NETWORK_DOMAIN, Constants.NETWORK_USER_NAME, Constants.NETWORK_PASSWORD, Constants.SELENROID_JAVA_CLIENT_LOCATION_WINDOWS,
             _portNumber, (_portNumber+1))};
         return argumentsArray;
     }
-
 }
