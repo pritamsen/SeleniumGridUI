@@ -21,7 +21,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.uiautomation.ios.IOSCapabilities;
 
 public class SeleniumOperation {
 
@@ -167,7 +166,7 @@ public class SeleniumOperation {
         } else if (browser.equalsIgnoreCase("safari")) {
             caps = DesiredCapabilities.safari();
         } else if (browser.equalsIgnoreCase("iphone")) {
-            caps = IOSCapabilities.iphone("Safari");
+            caps = DesiredCapabilities.iphone();
         } else if (browser.equalsIgnoreCase("ipad")) {
             caps = DesiredCapabilities.ipad();
         } else {
