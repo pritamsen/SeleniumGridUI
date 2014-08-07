@@ -62,7 +62,7 @@ public class SeleniumOperation {
             hostDetails.setHostOperatingSystem(os);
             response.setOs(os);
             response.setBrowser(response.getBrowser());
-            if (response.getBrowser().toLowerCase().startsWith("i") || response.getBrowser().toLowerCase().startsWith("a")) {
+            if (response.getBrowser().toLowerCase().startsWith("ip") || response.getBrowser().toLowerCase().startsWith("a")) {
                 return;
             }
             String session = startBrowser(response);
