@@ -33,11 +33,4 @@ public class JsonReader {
       is.close();
     }
   }
-/*
-  public static void main(String[] args) throws IOException, JSONException {
-    JSONObject json = readJsonFromUrl("https://graph.facebook.com/19292868552");
-    System.out.println(json.toString());
-    System.out.println(json.get("id"));
-  }
-  */
 }

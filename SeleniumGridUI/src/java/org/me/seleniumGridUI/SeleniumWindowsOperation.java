@@ -47,5 +47,5 @@ public class SeleniumWindowsOperation {
             _hostName, Constants.NETWORK_DOMAIN, Constants.NETWORK_USER_NAME, Constants.NETWORK_PASSWORD, Constants.SELENROID_JAVA_CLIENT_LOCATION_WINDOWS,
             _portNumber, (_portNumber+1))};
         return argumentsArray;
-    }
+    }   
 }

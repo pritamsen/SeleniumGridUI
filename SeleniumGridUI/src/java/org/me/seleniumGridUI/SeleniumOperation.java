@@ -6,8 +6,14 @@
 package org.me.seleniumGridUI;
 
 import com.thoughtworks.selenium.DefaultSelenium;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletContext;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.me.seleniumGridUI.model.HostDetails;
 import org.me.seleniumGridUI.model.StartSeleniumResponse;
@@ -124,16 +130,17 @@ public class SeleniumOperation {
             } finally {
                 StopSeleniumJavaClient(hostname, portNumber);
             }
-        } else {
+        } else {            
             StopSeleniumJavaClient(hostname, portNumber);
 
         }
-    }
+    }   
+    
 
-    private void StopSeleniumJavaClient(String hostname, int portNumber) {
-        DefaultSelenium runningSeleniumClient = InitializeJavaBackWardSelenium(hostname, portNumber);
-        runningSeleniumClient.stop();
-        runningSeleniumClient.shutDownSeleniumServer();
+    private void StopSeleniumJavaClient(String hostname, int portNumber) throws Throwable {        
+        URL url = new URL(String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_SHUTDOWN, hostname, portNumber));
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        http.getResponseCode();
     }
 
     private DefaultSelenium InitializeJavaBackWardSelenium(String hostname, int portNumber) {
@@ -177,19 +184,16 @@ public class SeleniumOperation {
 
     private String IsJavaClientStartedFully(String hostname, int portNumber) throws Throwable {
         int retyTimes = 5;
-        int delayTime = 2000;
-        String url = String.format(Constants.SELENIUM_REMOTE_WEBDRIVER_URL_STATUS, hostname, portNumber);
+        int delayTime = 2000;        
         int i = 0;
         for (i = 0; i < retyTimes; i++) {
-            try {
-                JSONObject jsonValueObject = readJsonFromUrl(url);
-                JSONObject value = (JSONObject) jsonValueObject.get("value");
-                JSONObject osObject = (JSONObject) value.get("os");
-                String os = osObject.get("name").toString();
-
-                if (os != null && !os.isEmpty()) {
-                    return os;
-                } else {
+            try {                
+                SeleniumStatus ss = new SeleniumStatus(hostname, portNumber);
+                if(ss.getOS() != null)
+                {
+                  return ss.getOS();
+                }               
+                 else {
                     throw new Exception("Empty os");
                 }
             } catch (Exception e) {
@@ -201,4 +205,11 @@ public class SeleniumOperation {
         }
         return null;
     }
+    
+     public void PerformCleanUp(String hostName,  ServletContext context) throws Throwable{
+         String killRemoteProcessExePath = context.getRealPath("/WEB-INF/resources/killRemoteProcess/CleanVM.exe");
+         String finalPath = String.format("%s \"chrome; iexplore; firefox; java; chromedriver; IEDriverServer; cmd; WerFault; powershell\" %s %s", killRemoteProcessExePath, hostName, hostName);
+         Process ps = Runtime.getRuntime().exec(finalPath);
+         ps.waitFor();
+    } 
 }

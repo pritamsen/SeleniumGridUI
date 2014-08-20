@@ -18,9 +18,10 @@ public class Constants {
     public final static String SELENIUM_CHROMEDRIVER_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\ChromeDriver2.10\\chromedriver.exe";
     public final static String SELENIUM_IEDRIVER_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\IEDriver2.42.0\\IEDriverServer.exe";
     public final static String SELENIUM_PHANTOMJS_LOCATION = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\phantomjs-1.9.7\\phantomjs.exe";
-    public final static String SELENROID_JAVA_CLIENT_LOCATION_WINDOWS = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\selendroid-standalone-0.9.0-with-dependencies.jar";
+    public final static String SELENROID_JAVA_CLIENT_LOCATION_WINDOWS = "\\\\filesrv\\public\\public files\\SeleniumSetUp\\selendroid-standalone-0.11.0-with-dependencies.jar";
     public final static String SELENIUM_REMOTE_WEBDRIVER_URL_FORMAT = "http://%s:%s/wd/hub";
     public final static String SELENIUM_REMOTE_WEBDRIVER_URL_STATUS = "http://%s:%s/wd/hub/status";
+    public final static String SELENIUM_REMOTE_WEBDRIVER_URL_SHUTDOWN = "http://%s:%s/selenium-server/driver/?cmd=shutDownSeleniumServer";
     public final static List MAC_MACHINE = Arrays.asList("andreass-mbp.as24.local");
     public final static String SELENIUM_JAVA_CLIENT_LOCATION_MAC = "Downloads/selenium-server-standalone-2.42.0.jar";      
     public final static String IOS_Driver_JAVA_CLIENT_LOCATION_MAC = "Downloads/ios-server-standalone-0.6.6-SNAPSHOT.jar";

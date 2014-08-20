@@ -66,5 +66,6 @@ public class SeleniumGridHelper {
 
     public static boolean isValidSessionParam(String sessionId) {
         return (sessionId != null && !sessionId.isEmpty()) ? true : false;
-    }
+    }   
+    
 }

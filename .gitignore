@@ -1,3 +1,7 @@
 _MACOSX/
 /SeleniumGridUI/build/
 /SeleniumGridUI/dist/
+/SeleniumDataGrid/nbproject/private/
+/SeleniumDataGridWeb/nbproject/private/
+/SeleniumDataGridWeb/build/
+/SeleniumDataGridWeb/dist/
