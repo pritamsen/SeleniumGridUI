@@ -5,10 +5,13 @@
  */
 package org.me.seleniumGridUI.model;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  *
  * @author vkumar
  */
+@XmlType(name="StartSeleniumResponse")
 public class StartSeleniumResponse extends SeleniumResponse {
 
     private String hostName;
@@ -19,10 +22,13 @@ public class StartSeleniumResponse extends SeleniumResponse {
     private String os;
 
     public StartSeleniumResponse(HostDetails hostDetails, StartSeleniumRequest request) {
-        this.hostName = hostDetails.getHostName();
-        this.freePort = hostDetails.getPort();
-        this.ipAddres = hostDetails.getHostAddress();
-        this.os = hostDetails.getHostOperatingSystem();
+        if(hostDetails != null)
+        {
+            this.hostName = hostDetails.getHostName();
+            this.freePort = hostDetails.getPort();
+            this.ipAddres = hostDetails.getHostAddress();
+            this.os = hostDetails.getHostOperatingSystem();
+        }
         this.browser = request.getBrowser();
     }
 

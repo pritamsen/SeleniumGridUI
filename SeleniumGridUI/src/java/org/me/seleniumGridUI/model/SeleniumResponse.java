@@ -5,20 +5,23 @@
  */
 package org.me.seleniumGridUI.model;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  *
  * @author dhayad
  */
+@XmlType(name="SeleniumResponse")
 public class SeleniumResponse {
 
-    private Response response;
+    private OperationStatus response;
     private String info = "Selenium Response";
 
-    public Response getResponse() {
+    public OperationStatus getResponse() {
         return response;
     }
 
-    public void setResponse(Response response) {
+    public void setResponse(OperationStatus response) {
         this.response = response;
     }
 

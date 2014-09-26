@@ -13,50 +13,34 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.UUID;
 import org.me.seleniumGridUI.util.Constants;
+import org.me.seleniumGridUI.util.MacOperationReturnValues;
+import org.me.seleniumGridUI.util.MacRemoteStartCommands;
+import org.me.seleniumGridUI.util.ReadUrlContent;
 
 /**
  *
  * @author vkumar
  */
 public class SeleniumMacOperations {
-
-    private final int _portNumber;
-    private final String _driver;
+    
+    private final int _portNumber;    
     private final String _windowExecutorPath;
     private final String _pathPuttyExe;
     private final String _hostName;
-    private String _TempFile;
+    private final MacOperationReturnValues _macOperationReturnValues;
     
-    public String getTempFile()
-    {
-        return _TempFile;
-    }
-
-    public SeleniumMacOperations(String windowExecutorPath, String pathPuttyExe, int portNumber, String hostName, String driver) {
-        this._portNumber = portNumber;
-        this._driver = driver;
+        public SeleniumMacOperations(String windowExecutorPath, String pathPuttyExe, int portNumber, String hostName) {
+        this._portNumber = portNumber;        
         this._windowExecutorPath = windowExecutorPath;
         this._pathPuttyExe = pathPuttyExe;
         this._hostName = hostName;
-    }
-
-    private String CreateTextFileWithCommandToExecuteInMacOs() {
-        return CreateATextFile(CommandToExecuteOnMac());
-    }
-
-    private String CommandToExecuteOnMac() {
-        String syntax = String.format("osascript -e 'tell app \"Terminal\" to do script \"java -jar %s -port %s\"'", Constants.SELENIUM_JAVA_CLIENT_LOCATION_MAC, _portNumber);
-        if (_driver.toLowerCase().startsWith("i")) {
-            syntax = String.format("osascript -e 'tell app \"Terminal\" to do script \"java -jar %s -port %s -newSessionTimeoutSec 120 -beta\"'", Constants.IOS_Driver_JAVA_CLIENT_LOCATION_MAC, _portNumber);
-        }
-        return syntax;
-    }
-
+        this._macOperationReturnValues = new MacOperationReturnValues();
+    }   
+        
     private String CreateATextFile(String content) {
         String randomFileName = UUID.randomUUID().toString();
         try {
-            _TempFile = String.format("%s\\%s.txt", Constants.TEMP_FILE_LOCATION_MAC, randomFileName);
-            String txtFileLocationContainingMacSyntax = _TempFile;
+            String txtFileLocationContainingMacSyntax = String.format("%s\\%s.txt", Constants.MAC_TEMP_FILE_LOCATION, randomFileName);
             File statText = new File(txtFileLocationContainingMacSyntax);
             FileOutputStream is = new FileOutputStream(statText);
             OutputStreamWriter osw = new OutputStreamWriter(is);
@@ -70,12 +54,67 @@ public class SeleniumMacOperations {
         return null;
     }
 
-    public String CompeleteSyntaxToExecuteForMac() {
+    private String CompeleteSyntaxToExecuteForMac(String textFileLocation) {
         String argumentsArray[] = {String.format("machine=localhost process=cmd.exe processargs=\"/c %s -ssh %s@%s -pw %s -m %s\"",
-            _pathPuttyExe, Constants.NETWORK_USER_NAME, _hostName, Constants.NETWORK_PASSWORD, CreateTextFileWithCommandToExecuteInMacOs())};
+            _pathPuttyExe, Constants.NETWORK_USER_NAME, _hostName, Constants.NETWORK_PASSWORD, textFileLocation)};
         return String.format("%s %s", _windowExecutorPath, argumentsArray[0]);
     }
-
+    
+    public MacOperationReturnValues CompleteSyntaxToStartJavaWebClientInMac ()
+    {
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxforJavaSeleniumWebClient(_portNumber);
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+        _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));
+        return _macOperationReturnValues;
+    }
+    
+    public MacOperationReturnValues CompleteSyntaxToStartIosDriverInMac ()
+    {
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxforJavaIosDriver(_portNumber);
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+         _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));
+        return _macOperationReturnValues;
+    }
+    
+    public MacOperationReturnValues CompleteSyntaxToQuitRunningProcess (String processName)
+    {
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxToQuitRunningProcessByName(processName);
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+         _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));
+        return _macOperationReturnValues;
+    }
+    
+    public MacOperationReturnValues CompleteSyntaxToOpenAppication (String applicationName)
+    {
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxToOpenApplication(applicationName);
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+        _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));
+        return _macOperationReturnValues;
+    }
+    
+    public MacOperationReturnValues CompleteSyntaxToForceQuitRunningProcess ( String processName)
+    {
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxToForceKillRunningProcessByName(processName);
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+         _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));
+        return _macOperationReturnValues;
+    }
+    
+    public MacOperationReturnValues CompleteSyntaxToChangeTheHostFile (String environemntName) throws Throwable
+    {        
+        ReadUrlContent readUrlContent  = new ReadUrlContent(String.format(Constants.HOST_FILE_CONTENT, environemntName.toLowerCase()));
+        String contentTowriteInTextFile = new MacRemoteStartCommands().GetSyntaxToReplaceHostFile(readUrlContent.getCompleteContent());
+        String writeATextFileAndReturnLocation = CreateATextFile(contentTowriteInTextFile);
+         _macOperationReturnValues.setTextFileLocation(writeATextFileAndReturnLocation);        
+        _macOperationReturnValues.setSyntaxToExecute(CompeleteSyntaxToExecuteForMac(writeATextFileAndReturnLocation));        
+        return _macOperationReturnValues;
+    } 
+    
     public static void DeleteTextFile(String textFileLocation) {
         File file = new File(textFileLocation);
         file.delete();

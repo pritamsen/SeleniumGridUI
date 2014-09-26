@@ -20,12 +20,19 @@ public class SeleniumGridHelper {
         try {
             hostDetails = hostName.toLowerCase().startsWith("local")
                     ? getLocalHostDetails() : getInetHostDetails(hostName);
+            if(hostDetails == null)
+                return null;
             hostDetails.setPort(SeleniumGridHelper.generateRandomPortNumber());
-        } catch (Throwable e) {
+        } catch (Throwable e) {            
             logger.warning("Failed to extract hostDetails for " + hostName);
             logger.log(Level.SEVERE, "Failed to extract hostDetails for " + hostName, e);
         }
         return hostDetails;
+    }
+    
+    public static int generate(int min,int max)
+    {
+        return min + (int)(Math.random() * ((max - min) + 1));
     }
 
     private static HostDetails getLocalHostDetails() throws Throwable {
@@ -41,6 +48,9 @@ public class SeleniumGridHelper {
         HostDetails hostDetails = new HostDetails();
         hostDetails.setHostAddress(inetAddress.getHostAddress());
         final String myHostName = inetAddress.getHostName();
+        int timeout = 2000;
+        if(!inetAddress.isReachable(timeout))
+            return null;            
         hostDetails.setHostName(myHostName);
         hostDetails.setHostOperatingSystem(ReturnOperatingSystem(myHostName));
         return hostDetails;
@@ -67,5 +77,4 @@ public class SeleniumGridHelper {
     public static boolean isValidSessionParam(String sessionId) {
         return (sessionId != null && !sessionId.isEmpty()) ? true : false;
     }   
-    
 }

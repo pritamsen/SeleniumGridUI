@@ -11,6 +11,7 @@ public class HostDetails {
     private String hostName;
     private String hostAddress;
     private String operatingSystem;
+    private String environment;
 
     public int getPort() {
         return port;
@@ -43,4 +44,12 @@ public class HostDetails {
     public void setHostOperatingSystem(String operatingSystem) {
         this.operatingSystem = operatingSystem;
     }
+    
+    public String getEnvironemnt() {
+        return environment;
+    }
+
+    public void setEnvironemnt(String environemnt) {
+        this.environment = environemnt;
+    }    
 }

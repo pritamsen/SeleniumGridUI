@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author vkumar
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+ @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "StartSeleniumClientRequest")
 public class StartSeleniumRequest implements Serializable {
 
